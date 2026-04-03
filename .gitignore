@@ -1,16 +1,23 @@
 # Go
-go/bin/
-go/*.exe
-go/*.so
-go/*.dylib
-go/data/
-go/vendor/
+/bin/
+/vendor/
+*.exe
 
 # Rust
-rust/target/
-rust/Cargo.lock
+/target/
+/Cargo.lock
 
-# 系统
+# IDE & OS
 .idea/
 .DS_Store
-*.log
+Thumbs.db
+
+# Env & Secrets
+.env
+.env.*
+*.key
+*.pem
+
+# Build artifacts
+*.o
+*.a

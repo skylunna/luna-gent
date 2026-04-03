@@ -30,13 +30,13 @@
   "rust-analyzer.inlayHints.chainingHints.enable": true,
 
   // ==================== 文件关联/排除 ====================
-  "files.exclude": {
-    "**/.git": true,
-    "**/node_modules": true,
-    "rust/target": true,
-    "go/bin": true,
-    "go/vendor": true
-  },
+  // "files.exclude": {
+  //   "**/.git": true,
+  //   "**/node_modules": true,
+  //   "rust/target": true,
+  //   "go/bin": true,
+  //   "go/vendor": true
+  // },
 
   // ==================== 终端 ====================
   "terminal.integrated.defaultProfile.windows": "PowerShell",

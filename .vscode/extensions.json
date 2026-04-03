@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "golang.go",
+    "rust-lang.rust-analyzer",
+    "streetsidesoftware.code-spell-checker",
+    "EditorConfig.EditorConfig",
+    "mhutchie.git-graph"
+  ]
+}

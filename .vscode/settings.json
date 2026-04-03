@@ -1,0 +1,45 @@
+{
+  // ==================== 基础编辑器配置 ====================
+  "editor.formatOnSave": true,
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "files.encoding": "utf8",
+  "files.eol": "\n",
+  "editor.rulers": [80, 120],
+  "editor.wordWrap": "on",
+  "editor.minimap.enabled": true,
+
+  // ==================== Go 语言专用配置 ====================
+  "go.useLanguageServer": true,
+  "go.formatTool": "gofmt",
+  "go.lintTool": "golint",
+  "go.testOnSave": false,
+  "go.toolsManagement.autoUpdate": true,
+  "go.docsTool": "godoc",
+  "go.buildTags": "",
+  "go.env": {
+    "GOPROXY": "https://goproxy.io,direct"
+  },
+
+  // ==================== Rust 语言专用配置 ====================
+  "rust-analyzer.enable": true,
+  "rust-analyzer.checkOnSave.command": "clippy",
+  "rust-analyzer.cargo.allFeatures": true,
+  "rust-analyzer.inlayHints.typeHints.enable": true,
+  "rust-analyzer.inlayHints.parameterHints.enable": true,
+  "rust-analyzer.inlayHints.chainingHints.enable": true,
+
+  // ==================== 文件关联/排除 ====================
+  "files.exclude": {
+    "**/.git": true,
+    "**/node_modules": true,
+    "rust/target": true,
+    "go/bin": true,
+    "go/vendor": true
+  },
+
+  // ==================== 终端 ====================
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.fontSize": 14,
+  "terminal.integrated.cursorBlinking": true
+}

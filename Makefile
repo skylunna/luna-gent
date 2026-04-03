@@ -1,15 +1,19 @@
 .PHONY: build clean
 
-# 编译 Rust 静态库
-rust:
-	cd rust && cargo build --release
+ROOT_DIR := $(shell pwd)
 
-# 编译 Go 二进制（暂不链接 Rust，先跑通结构）
-go:
-	CGO_ENABLED=0 go build -ldflags="-s -w" -o bin/luna-gent ./cmd/luna-gent
-
-# 完整构建（后续启用 CGO）
-build: rust go
+build:
+	@echo "🛠️  Building luna-gent (Go + Rust FFI)..."
+	@mkdir -p rust/target/include
+	# 1. 生成 C 头文件
+	@cd rust && cbindgen --config cbindgen.toml --crate luna-core --output $(ROOT_DIR)/rust/target/include/luna_core.h
+	# 2. 编译 Rust 静态库
+	@cd rust && cargo build --release
+	# 3. 编译 Go 二进制 (启用 CGO)
+	@CGO_ENABLED=1 \
+	 CGO_LDFLAGS="-L$(ROOT_DIR)/rust/target/release" \
+	 go build -ldflags="-s -w" -o bin/luna-gent ./cmd/luna-gent
+	@echo "✅  Build success: bin/luna-gent"
 
 clean:
 	rm -rf bin/ rust/target/

@@ -1,0 +1,16 @@
+# Go
+go/bin/
+go/*.exe
+go/*.so
+go/*.dylib
+go/data/
+go/vendor/
+
+# Rust
+rust/target/
+rust/Cargo.lock
+
+# 系统
+.idea/
+.DS_Store
+*.log

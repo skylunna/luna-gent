@@ -1,54 +1,89 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"math"
+	"math/rand/v2"
 	"os"
-	"strings"
 
 	"github.com/skylunna/luna-gent/pkg/ffi" // 请确保与 go.mod 的 module 名称一致
 )
 
 func main() {
-	fmt.Println("🌙 luna-gent v0.1.3 | Document Parsing Test")
+	fmt.Println("🌙 luna-gent v0.1.4 | Vector Index & Search Test")
 
-	// 自动生成测试文件，跑完自动清理
-	testFile := "luna_test_sample.md"
-	testContent := `# Luna-Gent 测试文档
-这是用于验证 FFI 解析层的示例文档。
-我们将测试多段落切割与元数据绑定功能。
+	// 1. 解析文档
+	testFile := "luna_test.md"
+	content := `# 架构设计
+Go 负责调度，Rust 负责计算。
+向量检索采用 Flat Index + 余弦相似度。
 
-## 架构设计
-Go 负责调度与交互，Rust 负责高性能计算。
-这是第一段的补充说明，用于测试长度累积逻辑。
+# 性能优化
+rkyv 序列化支持零拷贝加载。
+内存安全由 Rust 借用检查器保障。
 
-## 下一阶段
-向量检索与 Embedding 将在后续迭代中接入。
-目前我们只关注文档解析与分块是否正确返回。
+# 下一步
+接入真实 Embedding API 网关。
 `
-	if err := os.WriteFile(testFile, []byte(testContent), 0644); err != nil {
-		log.Fatalf("❌ Failed to create test file: %v", err)
-	}
+	os.WriteFile(testFile, []byte(content), 0644)
 	defer os.Remove(testFile)
 
-	fmt.Printf("📄 Parsing: %s (chunk_size: 120 chars)\n", testFile)
-	chunks, err := ffi.ParseDocument(testFile, 120)
+	chunks, err := ffi.ParseDocument(testFile, 100)
 	if err != nil {
-		log.Fatalf("❌ Parse failed: %v", err)
+		log.Fatal(err)
+	}
+	fmt.Printf("✅ Parsed %d chunks\n", len(chunks))
+
+	// 2. 建索引 (模拟 Embedding 向量)
+	dim := 128
+	idx := ffi.IndexCreate(dim)
+	defer ffi.IndexFree(idx)
+
+	fmt.Println("🔧 Building index with mock embeddings...")
+	for _, c := range chunks {
+		vec := mockEmbed(dim)
+		vecJSON, _ := json.Marshal(vec)
+		metaJSON, _ := json.Marshal(c.Metadata)
+		if err := ffi.IndexAdd(idx, string(vecJSON), string(metaJSON)); err != nil {
+			log.Fatal(err)
+		}
 	}
 
-	fmt.Printf("✅ Success! Found %d chunks:\n", len(chunks))
-	for i, c := range chunks {
-		preview := truncate(c.Content, 60)
-		fmt.Printf("  [Chunk %d] ID: %d | Len: %d | Source: %s\n    → %s\n",
-			i+1, c.ID, len(c.Content), c.Metadata["source"], preview)
+	// 3. 语义检索
+	query := mockEmbed(dim)
+	queryJSON, _ := json.Marshal(query)
+	results, err := ffi.IndexSearch(idx, string(queryJSON), 2)
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	fmt.Printf("🔍 Top-2 Results:\n")
+	for i, r := range results {
+		fmt.Printf("  [%d] Score: %.4f | Meta: %v\n", i, r.Score, r.Metadata)
+	}
+
+	// 4. 持久化验证
+	idxPath := "test_index.rkyv"
+	defer os.Remove(idxPath)
+	if err := ffi.IndexSave(idx, idxPath); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("💾 Index saved successfully (verify with ls -lh)")
 }
 
-func truncate(s string, max int) string {
-	s = strings.TrimSpace(s)
-	if len(s) > max {
-		return s[:max] + "..."
+// 生成归一化随机向量（模拟 LLM Embedding）
+func mockEmbed(dim int) []float32 {
+	v := make([]float32, dim)
+	var norm float32
+	for i := range v {
+		v[i] = rand.Float32()
+		norm += v[i] * v[i]
 	}
-	return s
+	norm = float32(math.Sqrt(float64(norm)))
+	for i := range v {
+		v[i] /= norm
+	}
+	return v
 }
